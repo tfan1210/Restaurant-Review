@@ -1,14 +1,13 @@
 let restaurants,
   neighborhoods,
-  cuisines
-var newMap
-var markers = []
+  cuisines;
+var map;
+var markers = [];
 
 /**
  * Fetch neighborhoods and cuisines as soon as the page is loaded.
  */
 document.addEventListener('DOMContentLoaded', (event) => {
-  initMap(); // added
   fetchNeighborhoods();
   fetchCuisines();
 });
@@ -69,26 +68,9 @@ fillCuisinesHTML = (cuisines = self.cuisines) => {
 }
 
 /**
- * Initialize leaflet map, called from HTML.
+ * Initialize Google map, called from HTML.
+ *
  */
-// initMap = () => {
-//   self.newMap = L.map('map', {
-//     center: [40.722216, -73.987501],
-//     zoom: 12,
-//     scrollWheelZoom: false
-//   });
-//   L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.jpg70?access_token={mapboxToken}', {
-//     mapboxToken: 'pk.eyJ1IjoidGZhbjEyMTAiLCJhIjoiY2pqNDZweXU2MGFqMTN3bXdldW5xZmMxMiJ9.VgLYlXl1_fko-hLh85JIXg',
-//     maxZoom: 18,
-//     attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
-//       '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
-//       'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-//     id: 'mapbox.streets'
-//   }).addTo(newMap);
-//
-//   updateRestaurants();
-// }
-// Initialize google map
 window.initMap = () => {
   let loc = {
     lat: 40.722216,
@@ -100,6 +82,16 @@ window.initMap = () => {
     scrollwheel: false
   });
   updateRestaurants();
+
+  // a11y - Frames must have non-empty title attribute
+  // https://dequeuniversity.com/rules/axe/2.2/frame-title
+  // https://developers.google.com/maps/documentation/javascript/events
+  let setTitle = () => {
+    const iFrameGoogleMaps = document.querySelector('#map iframe');
+    iFrameGoogleMaps.setAttribute('title', 'Google Maps overview of restaurants');
+  }
+  self.map.addListener('tilesloaded', setTitle);
+
 }
 
 /**
@@ -135,9 +127,7 @@ resetRestaurants = (restaurants) => {
   ul.innerHTML = '';
 
   // Remove all map markers
-  if (self.markers) {
-    self.markers.forEach(marker => marker.remove());
-  }
+  self.markers.forEach(m => m.setMap(null));
   self.markers = [];
   self.restaurants = restaurants;
 }
@@ -158,29 +148,50 @@ fillRestaurantsHTML = (restaurants = self.restaurants) => {
  */
 createRestaurantHTML = (restaurant) => {
   const li = document.createElement('li');
+  li.className = 'restaurant-card';
 
   const image = document.createElement('img');
   image.className = 'restaurant-img';
   image.src = DBHelper.imageUrlForRestaurant(restaurant);
+  // Add alternative text.
+  image.setAttribute('alt', restaurant.alternative_text);
   li.append(image);
 
-  const name = document.createElement('h1');
+  // Create a div with class card-primary that contains h2, h3.
+  const divCardPrimary = document.createElement('div');
+  divCardPrimary.className = 'card-primary';
+  const name = document.createElement('h2');
+  name.className = 'card-title';
   name.innerHTML = restaurant.name;
-  li.append(name);
-
-  const neighborhood = document.createElement('p');
+  divCardPrimary.append(name);
+  const neighborhood = document.createElement('h3');
+  neighborhood.className = 'card-subtitle';
   neighborhood.innerHTML = restaurant.neighborhood;
-  li.append(neighborhood);
+  divCardPrimary.append(neighborhood);
+  li.append(divCardPrimary);
 
-  const address = document.createElement('p');
+  // Create a div with class card-secondary that contains further content.
+  const divCardSecondary = document.createElement('div');
+  divCardSecondary.className = 'card-secondary';
+  // Use contact address element.
+  // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/address
+  const address = document.createElement('address');
+  address.className = 'card-secondary-content';
   address.innerHTML = restaurant.address;
-  li.append(address);
+  divCardSecondary.append(address);
+  li.append(divCardSecondary);
 
+  // Create a div with class card-actions.
+  const divCardActions = document.createElement('div');
+  divCardActions.className = 'card-actions';
   const more = document.createElement('a');
+  more.className = 'card-actions-link';
   more.innerHTML = 'View Details';
   more.href = DBHelper.urlForRestaurant(restaurant);
-  li.append(more)
+  divCardActions.append(more);
+  li.append(divCardActions);
 
+  // Return has automatic semicolon insertion (ASI).
   return li
 }
 
@@ -190,23 +201,10 @@ createRestaurantHTML = (restaurant) => {
 addMarkersToMap = (restaurants = self.restaurants) => {
   restaurants.forEach(restaurant => {
     // Add marker to the map
-    const marker = DBHelper.mapMarkerForRestaurant(restaurant, self.newMap);
-    marker.on("click", onClick);
-
-    function onClick() {
-      window.location.href = marker.options.url;
-    }
-    self.markers.push(marker);
-  });
-
-}
-/* addMarkersToMap = (restaurants = self.restaurants) => {
-  restaurants.forEach(restaurant => {
-    // Add marker to the map
     const marker = DBHelper.mapMarkerForRestaurant(restaurant, self.map);
     google.maps.event.addListener(marker, 'click', () => {
       window.location.href = marker.url
     });
     self.markers.push(marker);
   });
-} */
+}

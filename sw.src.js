@@ -22,9 +22,7 @@ if (workbox) {
   // Force development builds
   // workbox.setConfig({ debug: true });
   // Force production builds
-  workbox.setConfig({
-    debug: false
-  });
+  workbox.setConfig({ debug: false });
 
   // The precacheAndRoute method of the precaching module takes a precache
   // "manifest" (a list of file URLs with "revision hashes") to cache on service
@@ -32,35 +30,7 @@ if (workbox) {
   // specified resources, serving them from the cache by default.
   // In addition to precaching, the precacheAndRoute method sets up an implicit
   // cache-first handler.
-  workbox.precaching.precacheAndRoute([{
-      "url": "css/styles.css",
-      "revision": "0e7f7120891b6609730d747c2c78b306"
-    },
-    {
-      "url": "data/restaurants.json",
-      "revision": "a294ed676e9bb2d3d50019ecb4292eaf"
-    },
-    {
-      "url": "index.html",
-      "revision": "375469cbd761d5ad336110b9d73b5686"
-    },
-    {
-      "url": "js/dbhelper.js",
-      "revision": "81e76e9572140f26622ea4fe428cc9eb"
-    },
-    {
-      "url": "js/main.js",
-      "revision": "957d7bbef08fe20de2e0a31131219be1"
-    },
-    {
-      "url": "js/restaurant_info.js",
-      "revision": "a798d8a9e1f3e1ca8709f2fb8cc010ae"
-    },
-    {
-      "url": "restaurant.html",
-      "revision": "ef524a681d8e0c52cdd55e6c0bb53ec3"
-    }
-  ]);
+  workbox.precaching.precacheAndRoute([]);
 
   // Google APIs
   // https://developers.google.com/web/tools/workbox/modules/workbox-strategies#stale-while-revalidate
@@ -74,9 +44,7 @@ if (workbox) {
       // Status 0 is the response you would get if you request a cross-origin
       // resource and the server that you're requesting it from is not
       // configured to serve cross-origin resources.
-      cacheableResponse: {
-        statuses: [0, 200]
-      }
+      cacheableResponse: {statuses: [0, 200]}
     })
   );
 
@@ -110,9 +78,7 @@ if (workbox) {
       // Status 0 is the response you would get if you request a cross-origin
       // resource and the server that you're requesting it from is not
       // configured to serve cross-origin resources.
-      cacheableResponse: {
-        statuses: [0, 200]
-      }
+      cacheableResponse: {statuses: [0, 200]}
     })
   );
 
